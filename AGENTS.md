@@ -13,8 +13,8 @@
 ## Project Shape
 
 - Monorepo: npm workspaces under `apps/*`.
-- Frontend: `apps/frontend`, Nuxt 3 SPA, Vite, Vue, vanilla-extract.
-- Backend: `apps/backend`, Hono on Node.js.
+- Frontend: `apps/web`, Nuxt 3 SPA, Vite, Vue, vanilla-extract.
+- Backend: `apps/api`, Hono on Node.js.
 - Local runtime: Docker Compose with PostgreSQL and Ollama.
 - Local LLM: Ollama `qwen2.5:0.5b`.
 - Cloud targets: Aurora DSQL and Amazon Bedrock.
@@ -46,8 +46,8 @@
 
 変更範囲に応じて最小十分な検証を選ぶ。
 
-- Backend TypeScript: `npm run typecheck -w @agents-sample/backend`
-- Frontend TypeScript/UI: `npm run typecheck -w @agents-sample/frontend`
+- Backend TypeScript: `npm run typecheck -w @agents-sample/api`
+- Frontend TypeScript/UI: `npm run typecheck -w @agents-sample/web`
 - Build-impacting changes: `npm run build`
 - Docker/Compose changes: `docker compose config --quiet`
 - Runtime smoke when Docker is available:

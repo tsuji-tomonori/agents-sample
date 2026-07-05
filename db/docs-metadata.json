@@ -1,0 +1,31 @@
+{
+  "tables": {
+    "conversations": "チャット会話のタイトルと更新時刻を保持する。",
+    "messages": "会話に紐づく user / assistant メッセージ本文を保持する。"
+  },
+  "relations": [
+    {
+      "from": "conversations",
+      "to": "messages",
+      "label": "has messages"
+    }
+  ],
+  "crud": {
+    "GET /api/conversations": {
+      "conversations": "R",
+      "messages": ""
+    },
+    "POST /api/conversations": {
+      "conversations": "C",
+      "messages": ""
+    },
+    "GET /api/conversations/{id}/messages": {
+      "conversations": "",
+      "messages": "R"
+    },
+    "POST /api/chat": {
+      "conversations": "C/R/U",
+      "messages": "C/R"
+    }
+  }
+}

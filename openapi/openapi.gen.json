@@ -1,0 +1,108 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Agents Sample API",
+    "version": "0.1.0"
+  },
+  "x-generated": "自動生成・直接編集禁止: npm run docs:generate で更新",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "tags": [
+          "system"
+        ],
+        "summary": "稼働状態を取得する",
+        "responses": {
+          "200": {
+            "description": "稼働状態"
+          },
+          "400": {
+            "description": "入力検証エラー"
+          },
+          "500": {
+            "description": "想定外エラー"
+          }
+        }
+      }
+    },
+    "/api/conversations": {
+      "get": {
+        "operationId": "listConversations",
+        "tags": [
+          "conversations"
+        ],
+        "summary": "会話一覧を取得する",
+        "responses": {
+          "200": {
+            "description": "会話一覧"
+          },
+          "400": {
+            "description": "入力検証エラー"
+          },
+          "500": {
+            "description": "想定外エラー"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createConversation",
+        "tags": [
+          "conversations"
+        ],
+        "summary": "新しい会話を作成する",
+        "responses": {
+          "201": {
+            "description": "作成した会話"
+          },
+          "400": {
+            "description": "入力検証エラー"
+          },
+          "500": {
+            "description": "想定外エラー"
+          }
+        }
+      }
+    },
+    "/api/conversations/{id}/messages": {
+      "get": {
+        "operationId": "listConversationMessages",
+        "tags": [
+          "conversations"
+        ],
+        "summary": "会話のメッセージ一覧を取得する",
+        "responses": {
+          "200": {
+            "description": "メッセージ一覧"
+          },
+          "400": {
+            "description": "入力検証エラー"
+          },
+          "500": {
+            "description": "想定外エラー"
+          }
+        }
+      }
+    },
+    "/api/chat": {
+      "post": {
+        "operationId": "postChat",
+        "tags": [
+          "chat"
+        ],
+        "summary": "AIチャットへメッセージを送信する",
+        "responses": {
+          "200": {
+            "description": "生成された assistant メッセージ"
+          },
+          "400": {
+            "description": "入力検証エラー"
+          },
+          "500": {
+            "description": "想定外エラー"
+          }
+        }
+      }
+    }
+  }
+}

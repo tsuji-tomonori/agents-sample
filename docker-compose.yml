@@ -41,7 +41,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: apps/backend/Dockerfile
+      dockerfile: apps/api/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
@@ -62,7 +62,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: apps/frontend/Dockerfile
+      dockerfile: apps/web/Dockerfile
       args:
         NUXT_PUBLIC_API_BASE: http://localhost:8787
     depends_on:

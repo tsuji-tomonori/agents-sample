@@ -10,8 +10,8 @@ description: Docker Compose、Hono API、PostgreSQL/Aurora DSQL、Ollama、Amazo
 Use this skill when changing:
 
 - `docker-compose.yml`
-- `apps/backend`
-- `apps/frontend` runtime config
+- `apps/api`
+- `apps/web` runtime config
 - PostgreSQL or Aurora DSQL connection logic
 - Ollama or Bedrock provider logic
 - environment variables in `.env.example`
@@ -48,8 +48,8 @@ Use this skill when changing:
 Select the smallest relevant subset:
 
 - Config syntax: `docker compose config --quiet`
-- Backend typecheck: `npm run typecheck -w @agents-sample/backend`
-- Frontend typecheck: `npm run typecheck -w @agents-sample/frontend`
+- Backend typecheck: `npm run typecheck -w @agents-sample/api`
+- Frontend typecheck: `npm run typecheck -w @agents-sample/web`
 - Build: `npm run build`
 - Runtime smoke:
   - `docker compose up --build -d`

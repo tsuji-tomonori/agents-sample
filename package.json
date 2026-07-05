@@ -6,15 +6,17 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w @agents-sample/backend\" \"npm run dev -w @agents-sample/frontend\"",
-    "build": "npm run build -w @agents-sample/backend && npm run build -w @agents-sample/frontend",
-    "typecheck": "npm run typecheck -w @agents-sample/backend && npm run typecheck -w @agents-sample/frontend"
+    "dev": "concurrently \"npm run dev -w @agents-sample/api\" \"npm run dev -w @agents-sample/web\"",
+    "build": "npm run build -w @agents-sample/api && npm run build -w @agents-sample/web",
+    "typecheck": "npm run typecheck -w @agents-sample/api && npm run typecheck -w @agents-sample/web",
+    "docs:generate": "node scripts/generate-design-docs.mjs",
+    "docs:check": "node scripts/generate-design-docs.mjs --check"
   },
   "devDependencies": {
     "concurrently": "8.2.2",
     "typescript": "5.5.4"
   },
   "overrides": {
-    "@vue-macros/common": "1.15.3"
+    "@vue-macros/common": "1.15.1"
   }
 }

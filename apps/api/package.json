@@ -1,5 +1,5 @@
 {
-  "name": "@agents-sample/backend",
+  "name": "@agents-sample/api",
   "private": true,
   "type": "module",
   "scripts": {
