@@ -1,5 +1,7 @@
 # Simple AI Chat
 
+[![CI/CD](https://github.com/tsuji-tomonori/agents-sample/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/tsuji-tomonori/agents-sample/actions/workflows/ci-cd.yml)
+
 Nuxt SPA + Hono + PostgreSQL のシンプルな AI チャットアプリです。
 
 ローカルでは Docker Compose で PostgreSQL と Ollama を起動し、最小クラスの日本語対応 OSS モデルとして `qwen2.5:0.5b` を自動取得します。クラウドでは `DATABASE_PROVIDER=dsql` と `LLM_PROVIDER=bedrock` に切り替えることで Aurora DSQL と Amazon Bedrock を使えます。
@@ -77,6 +79,15 @@ AWS credentials must be available through environment variables, an AWS profile,
 npm run typecheck
 npm run build
 ```
+
+## CI/CD
+
+GitHub Actions runs `npm ci`, generated design document checks, TypeScript checks, application builds, and Docker Compose configuration validation on pushes and pull requests.
+
+Pushes to `main` also publish Docker images to GHCR:
+
+- `ghcr.io/tsuji-tomonori/agents-sample-api`
+- `ghcr.io/tsuji-tomonori/agents-sample-web`
 
 ## Generate Design Artifacts From Implementation
 
