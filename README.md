@@ -73,6 +73,22 @@ BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20240620-v1:0
 
 AWS credentials must be available through environment variables, an AWS profile, or a workload role. The DSQL connector handles IAM token generation for PostgreSQL connections.
 
+## MicroVM Agent Chat
+
+Set `LLM_PROVIDER=microvm` to route chat replies through the Lambda MicroVM code-agent runner. The API writes a job payload to S3, starts the configured MicroVM image, waits for the run artifacts, and stores the returned `final_text` as the assistant message.
+
+```bash
+LLM_PROVIDER=microvm
+MICROVM_AGENT=codex # codex or claude
+ARTIFACT_BUCKET=your-agent-artifact-bucket
+OUTPUT_PREFIX=chat-runs/
+MICROVM_IMAGE_IDENTIFIER=arn:aws:lambda:ap-northeast-1:123456789012:microvm-image:your-image
+MICROVM_IMAGE_VERSION=1.0
+BEDROCK_REGION=ap-northeast-1
+```
+
+Use `CODEX_MICROVM_IMAGE_IDENTIFIER` and `CLAUDE_MICROVM_IMAGE_IDENTIFIER` when Codex and Claude Code use different images. `CODEX_MODEL` or `CLAUDE_MODEL_ID` can be set to select the model passed to the runner.
+
 ## Verification
 
 ```bash

@@ -5,12 +5,16 @@ import {
 } from '@aws-sdk/client-bedrock-runtime';
 import { config } from './config.js';
 import type { ChatMessage } from './db.js';
+import { generateWithMicrovm } from './microvm.js';
 
 type ProviderMessage = Pick<ChatMessage, 'role' | 'content'>;
 
 export async function generateReply(messages: ProviderMessage[]) {
   if (config.LLM_PROVIDER === 'bedrock') {
     return generateWithBedrock(messages);
+  }
+  if (config.LLM_PROVIDER === 'microvm') {
+    return generateWithMicrovm(messages);
   }
   return generateWithOllama(messages);
 }
