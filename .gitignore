@@ -1,0 +1,11 @@
+node_modules
+.nuxt
+.output
+dist
+.env
+.env.*
+!.env.example
+postgres-data
+ollama-data
+npm-debug.log*
+browser-screenshot*.png

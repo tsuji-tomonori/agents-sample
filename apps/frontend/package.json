@@ -1,0 +1,22 @@
+{
+  "name": "@agents-sample/frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --import ../../scripts/node20-compat.mjs ../../node_modules/nuxi/bin/nuxi.mjs dev --host 0.0.0.0",
+    "build": "node --import ../../scripts/node20-compat.mjs ../../node_modules/nuxi/bin/nuxi.mjs build",
+    "start": "node .output/server/index.mjs",
+    "typecheck": "node --import ../../scripts/node20-compat.mjs ../../node_modules/nuxi/bin/nuxi.mjs typecheck"
+  },
+  "dependencies": {
+    "@vanilla-extract/css": "1.15.3",
+    "@vanilla-extract/vite-plugin": "4.0.13",
+    "lucide-vue-next": "0.468.0",
+    "nuxt": "3.11.2",
+    "vue": "3.4.34"
+  },
+  "devDependencies": {
+    "typescript": "5.5.4",
+    "vue-tsc": "2.0.26"
+  }
+}
