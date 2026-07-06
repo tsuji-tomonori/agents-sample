@@ -9,3 +9,6 @@ postgres-data
 ollama-data
 npm-debug.log*
 browser-screenshot*.png
+cdk.out
+infra/cdk.out
+.codex-remote-attachments

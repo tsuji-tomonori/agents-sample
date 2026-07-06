@@ -3,14 +3,18 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "infra"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w @agents-sample/api\" \"npm run dev -w @agents-sample/web\"",
     "build": "npm run build -w @agents-sample/api && npm run build -w @agents-sample/web",
-    "typecheck": "npm run typecheck -w @agents-sample/api && npm run typecheck -w @agents-sample/web",
+    "test": "npm run test -w @agents-sample/api && npm run test -w @agents-sample/web && npm run test -w @agents-sample/infra",
+    "typecheck": "npm run typecheck -w @agents-sample/api && npm run typecheck -w @agents-sample/web && npm run typecheck -w @agents-sample/infra",
     "docs:generate": "node scripts/generate-design-docs.mjs",
-    "docs:check": "node scripts/generate-design-docs.mjs --check"
+    "docs:check": "node scripts/generate-design-docs.mjs --check",
+    "infra:typecheck": "npm run typecheck -w @agents-sample/infra",
+    "infra:synth": "npm run synth -w @agents-sample/infra"
   },
   "devDependencies": {
     "concurrently": "8.2.2",

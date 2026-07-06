@@ -1,0 +1,32 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type Query {
+  health: String!
+}
+
+input AgentEventInput {
+  conversationId: ID!
+  kind: String!
+  payload: AWSJSON!
+}
+
+type AgentEvent {
+  id: ID!
+  conversationId: ID!
+  kind: String!
+  payload: AWSJSON!
+  createdAt: AWSDateTime!
+}
+
+type Mutation {
+  publishAgentEvent(input: AgentEventInput!): AgentEvent!
+}
+
+type Subscription {
+  onAgentEvent(conversationId: ID!): AgentEvent
+    @aws_subscribe(mutations: ["publishAgentEvent"])
+}
