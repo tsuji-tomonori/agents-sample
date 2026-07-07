@@ -8,4 +8,7 @@
 | GET | `/api/conversations` | `listConversations` | 会話一覧を取得する | none |
 | POST | `/api/conversations` | `createConversation` | 新しい会話を作成する | none |
 | GET | `/api/conversations/{id}/messages` | `listConversationMessages` | 会話のメッセージ一覧を取得する | none |
+| POST | `/api/runs` | `createRun` | Create an Agentic RAG QA run | none |
+| GET | `/api/runs/{id}` | `getRun` | Get an Agentic RAG QA run | none |
+| GET | `/api/runs/{id}/events` | `listRunEvents` | List Agentic RAG QA run events | none |
 | POST | `/api/chat` | `postChat` | AIチャットへメッセージを送信する | none |

@@ -12,5 +12,11 @@
 | `conversations/create` | `M002` | `createConversation.unexpected_error` | `ERROR` | 500 | 想定外エラー |
 | `conversations/messages` | `M001` | `listConversationMessages.validation_failed` | `WARNING` | 400 | 入力検証エラー |
 | `conversations/messages` | `M002` | `listConversationMessages.unexpected_error` | `ERROR` | 500 | 想定外エラー |
+| `runs/create` | `M001` | `createRun.validation_failed` | `WARNING` | 400 | 入力検証エラー |
+| `runs/create` | `M002` | `createRun.unexpected_error` | `ERROR` | 500 | 想定外エラー |
+| `runs/detail` | `M001` | `getRun.validation_failed` | `WARNING` | 400 | 入力検証エラー |
+| `runs/detail` | `M002` | `getRun.unexpected_error` | `ERROR` | 500 | 想定外エラー |
+| `runs/events` | `M001` | `listRunEvents.validation_failed` | `WARNING` | 400 | 入力検証エラー |
+| `runs/events` | `M002` | `listRunEvents.unexpected_error` | `ERROR` | 500 | 想定外エラー |
 | `chat/post` | `M001` | `postChat.validation_failed` | `WARNING` | 400 | 入力検証エラー |
 | `chat/post` | `M002` | `postChat.unexpected_error` | `ERROR` | 500 | 想定外エラー |

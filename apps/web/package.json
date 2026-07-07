@@ -6,6 +6,7 @@
     "dev": "node --import ../../scripts/node20-compat.mjs ../../node_modules/nuxi/bin/nuxi.mjs dev --host 0.0.0.0",
     "build": "node --import ../../scripts/node20-compat.mjs ../../node_modules/nuxi/bin/nuxi.mjs build",
     "start": "node .output/server/index.mjs",
+    "test": "node --import tsx --test app.utils.test.ts",
     "typecheck": "node --import ../../scripts/node20-compat.mjs ../../node_modules/nuxi/bin/nuxi.mjs typecheck"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
     "@rollup/rollup-linux-x64-musl": "4.62.2"
   },
   "devDependencies": {
+    "tsx": "4.16.2",
     "typescript": "5.5.4",
     "vue-tsc": "2.0.26"
   }

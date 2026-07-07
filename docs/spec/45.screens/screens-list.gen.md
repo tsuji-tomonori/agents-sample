@@ -4,14 +4,14 @@
 
 | 画面ID | 画面名 | URL | 認証 | 権限 | レイアウト | 実装状態 |
 | --- | --- | --- | --- | --- | --- | --- |
-| SCR-CHAT-ROOT | AIチャット | / | 不要 | なし | sidebar + chat panel | 実装済み |
+| SCR-RUN-CONSOLE | Agentic RAG QA Console | / | 不要 | なし | question form + run detail panel | 実装済み |
 
-## SCR-CHAT-ROOT 画面仕様
+## SCR-RUN-CONSOLE 画面仕様
 
 | 項目 | 値 |
 | --- | --- |
-| 目的 | ローカルまたはクラウド LLM と会話する |
-| 主要コンポーネント | 会話一覧、新規チャット、メッセージ一覧、送信フォーム |
-| 利用API | `listConversations` / `listConversationMessages`, `postChat` |
-| 状態 | empty, loading/sending, conversation selected, error |
-| アクセシビリティ | 送信ボタンは `aria-label="送信"` を持つ |
+| 目的 | Agentic RAG QA run を作成し、進捗、回答、根拠、artifact、document access を確認する |
+| 主要コンポーネント | 質問フォーム、任意の資料スコープ、run status、timeline、answer、citations、document accesses、artifacts |
+| 利用API | `createRun` / `getRun` / `listRunEvents` |
+| 状態 | idle, queued, running, completed, failed, error |
+| アクセシビリティ | フォームコントロールは label を持ち、結果領域は `aria-live` と送信後 focus を持つ |

@@ -6,8 +6,11 @@ import { config } from './config.js';
 import {
   addMessage,
   createConversation,
+  createRun,
   db,
   getMessages,
+  getRun,
+  listRunEvents,
   listConversations,
 } from './db.js';
 import { generateReply } from './llm.js';
@@ -15,6 +18,11 @@ import { generateReply } from './llm.js';
 const chatSchema = z.object({
   conversationId: z.string().uuid().optional(),
   message: z.string().min(1).max(8000)
+});
+
+const runSchema = z.object({
+  question: z.string().min(1).max(8000),
+  documentScope: z.string().max(1000).optional()
 });
 
 export function createApp() {
@@ -45,6 +53,40 @@ export function createApp() {
 
   app.get('/api/conversations/:id/messages', async (c) => {
     return c.json({ messages: await getMessages(c.req.param('id')) });
+  });
+
+  app.post('/api/runs', async (c) => {
+    const body = runSchema.parse(await c.req.json());
+    const run = await createRun(body.question, body.documentScope);
+    return c.json({ run }, 201);
+  });
+
+  app.get('/api/runs/:id', async (c) => {
+    const parsed = z.string().uuid().safeParse(c.req.param('id'));
+    if (!parsed.success) {
+      return c.json({ error: 'Invalid run id' }, 400);
+    }
+
+    const run = await getRun(parsed.data);
+    if (!run) {
+      return c.json({ error: 'Run not found' }, 404);
+    }
+
+    return c.json({ run });
+  });
+
+  app.get('/api/runs/:id/events', async (c) => {
+    const parsed = z.string().uuid().safeParse(c.req.param('id'));
+    if (!parsed.success) {
+      return c.json({ error: 'Invalid run id' }, 400);
+    }
+
+    const run = await getRun(parsed.data);
+    if (!run) {
+      return c.json({ error: 'Run not found' }, 404);
+    }
+
+    return c.json({ events: await listRunEvents(parsed.data) });
   });
 
   app.post('/api/chat', async (c) => {

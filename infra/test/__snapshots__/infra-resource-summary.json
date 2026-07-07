@@ -1,0 +1,378 @@
+{
+  "counts": {
+    "AWS::ApiGateway::Account": 1,
+    "AWS::ApiGateway::Deployment": 1,
+    "AWS::ApiGateway::Method": 2,
+    "AWS::ApiGateway::Resource": 1,
+    "AWS::ApiGateway::RestApi": 1,
+    "AWS::ApiGateway::Stage": 1,
+    "AWS::AppSync::ApiKey": 1,
+    "AWS::AppSync::DataSource": 2,
+    "AWS::AppSync::GraphQLApi": 1,
+    "AWS::AppSync::GraphQLSchema": 1,
+    "AWS::AppSync::Resolver": 2,
+    "AWS::CloudFront::Distribution": 1,
+    "AWS::CloudFront::Function": 1,
+    "AWS::CloudFront::OriginAccessControl": 1,
+    "AWS::DSQL::Cluster": 1,
+    "AWS::IAM::Policy": 3,
+    "AWS::IAM::Role": 6,
+    "AWS::Lambda::Function": 3,
+    "AWS::Lambda::Permission": 4,
+    "AWS::Logs::LogGroup": 1,
+    "AWS::S3::Bucket": 2,
+    "AWS::S3::BucketPolicy": 2,
+    "AWS::WAFv2::WebACL": 1,
+    "Custom::LogRetention": 1
+  },
+  "dsql": {
+    "Type": "AWS::DSQL::Cluster",
+    "Properties": {
+      "DeletionProtectionEnabled": true,
+      "Tags": [
+        {
+          "Key": "Application",
+          "Value": "agents-sample"
+        },
+        {
+          "Key": "Environment",
+          "Value": "test"
+        }
+      ]
+    }
+  },
+  "waf": {
+    "Type": "AWS::WAFv2::WebACL",
+    "Properties": {
+      "DefaultAction": {
+        "Allow": {}
+      },
+      "Name": "agents-sample-test-cloudfront-web-acl",
+      "Rules": [
+        {
+          "Name": "AwsManagedCommonRuleSet",
+          "OverrideAction": {
+            "None": {}
+          },
+          "Priority": 10,
+          "Statement": {
+            "ManagedRuleGroupStatement": {
+              "Name": "AWSManagedRulesCommonRuleSet",
+              "VendorName": "AWS"
+            }
+          },
+          "VisibilityConfig": {
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "agentssampletestCommon",
+            "SampledRequestsEnabled": true
+          }
+        },
+        {
+          "Action": {
+            "Block": {}
+          },
+          "Name": "RateLimit",
+          "Priority": 20,
+          "Statement": {
+            "RateBasedStatement": {
+              "AggregateKeyType": "IP",
+              "Limit": 2000
+            }
+          },
+          "VisibilityConfig": {
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "agentssampletestRateLimit",
+            "SampledRequestsEnabled": true
+          }
+        }
+      ],
+      "Scope": "CLOUDFRONT",
+      "VisibilityConfig": {
+        "CloudWatchMetricsEnabled": true,
+        "MetricName": "agentssampletestWebAcl",
+        "SampledRequestsEnabled": true
+      }
+    }
+  },
+  "appsync": {
+    "Type": "AWS::AppSync::GraphQLApi",
+    "Properties": {
+      "AuthenticationType": "API_KEY",
+      "LogConfig": {
+        "CloudWatchLogsRoleArn": {
+          "Fn::GetAtt": [
+            "RealtimeAppSyncLogsRole5F03FF47",
+            "Arn"
+          ]
+        },
+        "ExcludeVerboseContent": true,
+        "FieldLogLevel": "ERROR"
+      },
+      "Name": "agents-sample-test-realtime",
+      "XrayEnabled": true
+    }
+  },
+  "cloudfront": {
+    "Type": "AWS::CloudFront::Distribution",
+    "Properties": {
+      "DistributionConfig": {
+        "CacheBehaviors": [
+          {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS",
+              "PUT",
+              "PATCH",
+              "POST",
+              "DELETE"
+            ],
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "Compress": true,
+            "OriginRequestPolicyId": "b689b0a8-53d0-40ab-baf2-68738e2966ac",
+            "PathPattern": "/api/*",
+            "ResponseHeadersPolicyId": "eaab4381-ed33-4a86-88ca-d9558dc6cd63",
+            "TargetOriginId": "InfraUnitTestStackCloudFrontSiteDistributionOrigin2671F4A81",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS"
+            ],
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "Compress": true,
+            "OriginRequestPolicyId": "b689b0a8-53d0-40ab-baf2-68738e2966ac",
+            "PathPattern": "/health",
+            "ResponseHeadersPolicyId": "67f7725c-6f97-4210-82d7-5512b31e9d03",
+            "TargetOriginId": "InfraUnitTestStackCloudFrontSiteDistributionOrigin3473B80CC",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS",
+              "PUT",
+              "PATCH",
+              "POST",
+              "DELETE"
+            ],
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "Compress": true,
+            "OriginRequestPolicyId": "b689b0a8-53d0-40ab-baf2-68738e2966ac",
+            "PathPattern": "/graphql",
+            "ResponseHeadersPolicyId": "eaab4381-ed33-4a86-88ca-d9558dc6cd63",
+            "TargetOriginId": "InfraUnitTestStackCloudFrontSiteDistributionOrigin42E04FA6D",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+              "OPTIONS",
+              "PUT",
+              "PATCH",
+              "POST",
+              "DELETE"
+            ],
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "Compress": true,
+            "OriginRequestPolicyId": "b689b0a8-53d0-40ab-baf2-68738e2966ac",
+            "PathPattern": "/graphql/realtime",
+            "ResponseHeadersPolicyId": "eaab4381-ed33-4a86-88ca-d9558dc6cd63",
+            "TargetOriginId": "InfraUnitTestStackCloudFrontSiteDistributionOrigin5A351941F",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          }
+        ],
+        "Comment": "agents-sample-test Agentic RAG QA Console",
+        "DefaultCacheBehavior": {
+          "AllowedMethods": [
+            "GET",
+            "HEAD",
+            "OPTIONS"
+          ],
+          "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+          "Compress": true,
+          "FunctionAssociations": [
+            {
+              "EventType": "viewer-request",
+              "FunctionARN": {
+                "Fn::GetAtt": [
+                  "CloudFrontSiteSpaRewriteFunctionFE8E7A0D",
+                  "FunctionARN"
+                ]
+              }
+            }
+          ],
+          "ResponseHeadersPolicyId": "67f7725c-6f97-4210-82d7-5512b31e9d03",
+          "TargetOriginId": "InfraUnitTestStackCloudFrontSiteDistributionOrigin139E06F06",
+          "ViewerProtocolPolicy": "redirect-to-https"
+        },
+        "DefaultRootObject": "index.html",
+        "Enabled": true,
+        "HttpVersion": "http2",
+        "IPV6Enabled": true,
+        "Logging": {
+          "Bucket": {
+            "Fn::GetAtt": [
+              "SiteBucketsLogBucket36781CF4",
+              "RegionalDomainName"
+            ]
+          },
+          "Prefix": "cloudfront/site/"
+        },
+        "Origins": [
+          {
+            "DomainName": {
+              "Fn::GetAtt": [
+                "SiteBucketsSpaBucket9852B5F6",
+                "RegionalDomainName"
+              ]
+            },
+            "Id": "InfraUnitTestStackCloudFrontSiteDistributionOrigin139E06F06",
+            "OriginAccessControlId": {
+              "Fn::GetAtt": [
+                "CloudFrontSiteDistributionOrigin1S3OriginAccessControl601D711F",
+                "Id"
+              ]
+            },
+            "S3OriginConfig": {
+              "OriginAccessIdentity": ""
+            }
+          },
+          {
+            "CustomOriginConfig": {
+              "OriginKeepaliveTimeout": 5,
+              "OriginProtocolPolicy": "https-only",
+              "OriginReadTimeout": 30,
+              "OriginSSLProtocols": [
+                "TLSv1.2"
+              ]
+            },
+            "DomainName": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "RestApiDEC94962"
+                  },
+                  ".execute-api.ap-northeast-1.",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Id": "InfraUnitTestStackCloudFrontSiteDistributionOrigin2671F4A81",
+            "OriginPath": {
+              "Fn::Join": [
+                "",
+                [
+                  "/",
+                  {
+                    "Ref": "RestApiDeploymentStageprod7243F481"
+                  }
+                ]
+              ]
+            }
+          },
+          {
+            "CustomOriginConfig": {
+              "OriginProtocolPolicy": "https-only",
+              "OriginSSLProtocols": [
+                "TLSv1.2"
+              ]
+            },
+            "DomainName": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "RestApiDEC94962"
+                  },
+                  ".execute-api.ap-northeast-1.",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Id": "InfraUnitTestStackCloudFrontSiteDistributionOrigin3473B80CC",
+            "OriginPath": {
+              "Fn::Join": [
+                "",
+                [
+                  "/",
+                  {
+                    "Ref": "RestApiDeploymentStageprod7243F481"
+                  }
+                ]
+              ]
+            }
+          },
+          {
+            "CustomOriginConfig": {
+              "OriginProtocolPolicy": "https-only",
+              "OriginSSLProtocols": [
+                "TLSv1.2"
+              ]
+            },
+            "DomainName": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Fn::GetAtt": [
+                      "RealtimeGraphqlApiD29DF012",
+                      "ApiId"
+                    ]
+                  },
+                  ".appsync-api.ap-northeast-1.",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Id": "InfraUnitTestStackCloudFrontSiteDistributionOrigin42E04FA6D"
+          },
+          {
+            "CustomOriginConfig": {
+              "OriginProtocolPolicy": "https-only",
+              "OriginSSLProtocols": [
+                "TLSv1.2"
+              ]
+            },
+            "DomainName": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Fn::GetAtt": [
+                      "RealtimeGraphqlApiD29DF012",
+                      "ApiId"
+                    ]
+                  },
+                  ".appsync-realtime-api.ap-northeast-1.",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Id": "InfraUnitTestStackCloudFrontSiteDistributionOrigin5A351941F"
+          }
+        ],
+        "PriceClass": "PriceClass_200",
+        "WebACLId": {
+          "Fn::GetAtt": [
+            "WebAcl9BD21CA7",
+            "Arn"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -62,6 +62,81 @@ const routeCatalog = {
     successDescription: 'メッセージ一覧',
     responseExample: { messages: [] }
   },
+  'POST /api/runs': {
+    operationId: 'createRun',
+    tag: 'runs',
+    docSlug: 'create',
+    summary: 'Create an Agentic RAG QA run',
+    auth: 'none',
+    successStatus: 201,
+    successDescription: 'Created run',
+    requestExample: {
+      question: 'What changed in the latest architecture notes?',
+      documentScope: 'docs/spec'
+    },
+    responseExample: {
+      run: {
+        id: 'uuid',
+        status: 'completed',
+        question: 'What changed in the latest architecture notes?',
+        documentScope: 'docs/spec',
+        answer: {
+          text: 'Simulated Agentic RAG answer.',
+          citations: [],
+          confidence: 0.72
+        },
+        events: [],
+        artifacts: [],
+        documentAccesses: []
+      }
+    }
+  },
+  'GET /api/runs/{id}': {
+    operationId: 'getRun',
+    tag: 'runs',
+    docSlug: 'detail',
+    summary: 'Get an Agentic RAG QA run',
+    auth: 'none',
+    successStatus: 200,
+    successDescription: 'Run state',
+    responseExample: {
+      run: {
+        id: 'uuid',
+        status: 'completed',
+        question: 'What changed in the latest architecture notes?',
+        documentScope: 'docs/spec',
+        answer: {
+          text: 'Simulated Agentic RAG answer.',
+          citations: [],
+          confidence: 0.72
+        },
+        events: [],
+        artifacts: [],
+        documentAccesses: []
+      }
+    }
+  },
+  'GET /api/runs/{id}/events': {
+    operationId: 'listRunEvents',
+    tag: 'runs',
+    docSlug: 'events',
+    summary: 'List Agentic RAG QA run events',
+    auth: 'none',
+    successStatus: 200,
+    successDescription: 'Run events',
+    responseExample: {
+      events: [
+        {
+          id: 'uuid',
+          runId: 'uuid',
+          type: 'run.completed',
+          message: 'Answer synthesized successfully.',
+          status: 'completed',
+          createdAt: '2026-07-06T00:00:00.000Z'
+        }
+      ]
+    }
+  },
   'POST /api/chat': {
     operationId: 'postChat',
     tag: 'chat',
@@ -388,7 +463,7 @@ sequenceDiagram
   participant DB as PostgreSQL/DSQL
   participant LLM as Ollama/Bedrock
   User->>API: ${route.method} ${route.path}
-${route.operationId === 'postChat' ? '  API->>DB: 会話履歴を保存・取得\n  API->>LLM: 履歴から応答を生成\n  LLM-->>API: assistant content\n  API->>DB: assistant message を保存\n' : route.path.includes('conversations') ? '  API->>DB: 会話またはメッセージを読み書き\n' : '  API->>DB: health query\n'}  API-->>User: HTTP ${route.successStatus}
+${route.operationId === 'postChat' ? '  API->>DB: 会話履歴を保存・取得\n  API->>LLM: 履歴から応答を生成\n  LLM-->>API: assistant content\n  API->>DB: assistant message を保存\n' : route.path.includes('runs') ? '  API->>DB: run, event, artifact, document access を読み書き\n' : route.path.includes('conversations') ? '  API->>DB: 会話またはメッセージを読み書き\n' : '  API->>DB: health query\n'}  API-->>User: HTTP ${route.successStatus}
   alt 入力検証エラー
     API-->>User: HTTP 400
   end
@@ -454,24 +529,26 @@ ${ddl.trim()}
 function renderScreensList(source) {
   const usesConversations = source.includes('/api/conversations');
   const usesChat = source.includes('/api/chat');
+  const usesRuns = source.includes('/api/runs');
   return `${generatedHeader}# 画面一覧
 
 | 画面ID | 画面名 | URL | 認証 | 権限 | レイアウト | 実装状態 |
 | --- | --- | --- | --- | --- | --- | --- |
-| SCR-CHAT-ROOT | AIチャット | / | 不要 | なし | sidebar + chat panel | 実装済み |
+| SCR-RUN-CONSOLE | Agentic RAG QA Console | / | 不要 | なし | question form + run detail panel | 実装済み |
 
-## SCR-CHAT-ROOT 画面仕様
+## SCR-RUN-CONSOLE 画面仕様
 
 | 項目 | 値 |
 | --- | --- |
-| 目的 | ローカルまたはクラウド LLM と会話する |
-| 主要コンポーネント | 会話一覧、新規チャット、メッセージ一覧、送信フォーム |
+| 目的 | Agentic RAG QA run を作成し、進捗、回答、根拠、artifact、document access を確認する |
+| 主要コンポーネント | 質問フォーム、任意の資料スコープ、run status、timeline、answer、citations、document accesses、artifacts |
 | 利用API | ${[
+    usesRuns ? '`createRun` / `getRun` / `listRunEvents`' : '',
     usesConversations ? '`listConversations` / `listConversationMessages`' : '',
     usesChat ? '`postChat`' : ''
   ].filter(Boolean).join(', ')} |
-| 状態 | empty, loading/sending, conversation selected, error |
-| アクセシビリティ | 送信ボタンは \`aria-label="送信"\` を持つ |
+| 状態 | idle, queued, running, completed, failed, error |
+| アクセシビリティ | フォームコントロールは label を持ち、結果領域は \`aria-live\` と送信後 focus を持つ |
 `;
 }
 

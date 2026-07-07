@@ -84,6 +84,66 @@
         }
       }
     },
+    "/api/runs": {
+      "post": {
+        "operationId": "createRun",
+        "tags": [
+          "runs"
+        ],
+        "summary": "Create an Agentic RAG QA run",
+        "responses": {
+          "201": {
+            "description": "Created run"
+          },
+          "400": {
+            "description": "入力検証エラー"
+          },
+          "500": {
+            "description": "想定外エラー"
+          }
+        }
+      }
+    },
+    "/api/runs/{id}": {
+      "get": {
+        "operationId": "getRun",
+        "tags": [
+          "runs"
+        ],
+        "summary": "Get an Agentic RAG QA run",
+        "responses": {
+          "200": {
+            "description": "Run state"
+          },
+          "400": {
+            "description": "入力検証エラー"
+          },
+          "500": {
+            "description": "想定外エラー"
+          }
+        }
+      }
+    },
+    "/api/runs/{id}/events": {
+      "get": {
+        "operationId": "listRunEvents",
+        "tags": [
+          "runs"
+        ],
+        "summary": "List Agentic RAG QA run events",
+        "responses": {
+          "200": {
+            "description": "Run events"
+          },
+          "400": {
+            "description": "入力検証エラー"
+          },
+          "500": {
+            "description": "想定外エラー"
+          }
+        }
+      }
+    },
     "/api/chat": {
       "post": {
         "operationId": "postChat",

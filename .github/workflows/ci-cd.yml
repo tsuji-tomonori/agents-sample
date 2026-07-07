@@ -8,10 +8,19 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      deploy_infra:
+        description: Deploy CDK stacks after verification
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
   packages: write
+  id-token: write
+  issues: write
+  pull-requests: write
 
 concurrency:
   group: ci-cd-${{ github.ref }}
@@ -22,6 +31,8 @@ jobs:
     name: Verify
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      HAS_INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY != '' }}
 
     steps:
       - name: Checkout
@@ -36,17 +47,125 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Prepare CI logs
+        run: mkdir -p ci-logs
+
       - name: Check generated design docs
-        run: npm run docs:check
+        id: docs-check
+        continue-on-error: true
+        run: npm run docs:check 2>&1 | tee ci-logs/docs-check.log
+
+      - name: Test
+        id: test
+        continue-on-error: true
+        run: npm test 2>&1 | tee ci-logs/test.log
 
       - name: Typecheck
-        run: npm run typecheck
+        id: typecheck
+        continue-on-error: true
+        run: npm run typecheck 2>&1 | tee ci-logs/typecheck.log
 
       - name: Build
-        run: npm run build
+        id: build
+        continue-on-error: true
+        run: npm run build 2>&1 | tee ci-logs/build.log
+
+      - name: Synthesize CDK and run cdk-nag
+        id: cdk-synth
+        continue-on-error: true
+        run: npm run infra:synth 2>&1 | tee ci-logs/cdk-synth.log
+
+      - name: Setup Infracost
+        if: ${{ env.HAS_INFRACOST_API_KEY == 'true' }}
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Estimate infrastructure cost
+        id: cost-estimate
+        if: ${{ env.HAS_INFRACOST_API_KEY == 'true' && steps.cdk-synth.outcome == 'success' }}
+        continue-on-error: true
+        run: |
+          {
+            echo "## Infracost estimate from CDK synth output"
+            echo
+            infracost breakdown --path infra/cdk.out --format table
+          } 2>&1 | tee ci-logs/cost-estimate.log
+
+      - name: Record skipped cost estimate
+        if: ${{ env.HAS_INFRACOST_API_KEY != 'true' || steps.cdk-synth.outcome != 'success' }}
+        run: |
+          {
+            echo "Cost estimate skipped."
+            if [ "${{ env.HAS_INFRACOST_API_KEY }}" != "true" ]; then
+              echo "Set repository secret INFRACOST_API_KEY to enable Infracost estimates from infra/cdk.out."
+            fi
+            if [ "${{ steps.cdk-synth.outcome }}" != "success" ]; then
+              echo "CDK synth did not succeed, so infra/cdk.out is not a trusted cost input."
+            fi
+          } > ci-logs/cost-estimate.log
 
       - name: Validate Docker Compose
-        run: docker compose config --quiet
+        id: docker-compose
+        continue-on-error: true
+        run: docker compose config --quiet 2>&1 | tee ci-logs/docker-compose.log
+
+      - name: Configure AWS credentials for CDK diff
+        if: ${{ vars.AWS_ROLE_ARN != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'ap-northeast-1' }}
+
+      - name: CDK diff
+        id: cdk-diff
+        if: ${{ vars.AWS_ROLE_ARN != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        continue-on-error: true
+        run: npm run diff -w @agents-sample/infra -- --no-color 2>&1 | tee ci-logs/cdk-diff.log
+
+      - name: Record skipped CDK diff
+        if: ${{ !(vars.AWS_ROLE_ARN != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)) }}
+        run: |
+          {
+            echo "CDK diff skipped."
+            echo "Set repository variable AWS_ROLE_ARN, and optionally AWS_REGION, to enable diff against the AWS environment."
+            echo "For pull requests from forks, diff is skipped to avoid exposing AWS credentials."
+          } > ci-logs/cdk-diff.log
+
+      - name: Comment PR with CI/CD results
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCS_CHECK_OUTCOME: ${{ steps.docs-check.outcome }}
+          TEST_OUTCOME: ${{ steps.test.outcome }}
+          TYPECHECK_OUTCOME: ${{ steps.typecheck.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          CDK_SYNTH_OUTCOME: ${{ steps.cdk-synth.outcome }}
+          COST_ESTIMATE_OUTCOME: ${{ steps.cost-estimate.outcome }}
+          DOCKER_COMPOSE_OUTCOME: ${{ steps.docker-compose.outcome }}
+          CDK_DIFF_OUTCOME: ${{ steps.cdk-diff.outcome }}
+        run: node .github/scripts/comment-pr-ci.mjs
+
+      - name: Fail verify on failed checks
+        if: always()
+        run: |
+          failed=0
+          for outcome in \
+            "${{ steps.docs-check.outcome }}" \
+            "${{ steps.test.outcome }}" \
+            "${{ steps.typecheck.outcome }}" \
+            "${{ steps.build.outcome }}" \
+            "${{ steps.cdk-synth.outcome }}" \
+            "${{ steps.cost-estimate.outcome }}" \
+            "${{ steps.docker-compose.outcome }}" \
+            "${{ steps.cdk-diff.outcome }}"
+          do
+            if [ "$outcome" = "failure" ]; then
+              failed=1
+            fi
+          done
+          exit "$failed"
 
   publish-images:
     name: Publish Images
@@ -98,3 +217,37 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             NUXT_PUBLIC_API_BASE=http://localhost:8787
+
+  deploy-infra:
+    name: Deploy CDK
+    runs-on: ubuntu-latest
+    needs:
+      - verify
+    if: ${{ vars.AWS_ROLE_ARN != '' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.deploy_infra)) }}
+    timeout-minutes: 45
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application artifacts
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'ap-northeast-1' }}
+
+      - name: Deploy CDK stacks
+        run: npm run deploy -w @agents-sample/infra -- --require-approval never
